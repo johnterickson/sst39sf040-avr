@@ -1,4 +1,4 @@
-use std::{error::Error, io::{self, BufRead, BufReader, Write}, thread::sleep, time::Duration};
+use std::{error::Error, io::{self, BufRead, BufReader, Write}, thread::sleep, time::{Duration, Instant}};
 
 use serialport::prelude::*;
 
@@ -102,12 +102,15 @@ fn main() -> Result<(), Box<dyn Error>>{
     write!(port, "a0\n")?; port.flush()?;
     println!("{}", read_line()?);
 
+    let start = Instant::now();
+
     for b in &bytes {
         write!(port, "w{:02x}\n", b)?; port.flush()?;
         let response = read_line()?;
         assert_eq!(*b, u8::from_str_radix(response.trim(), 16).unwrap());
     }
 
+    println!("{:?}", Instant::now().duration_since(start));
     
     Ok(())
 }
